@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 /**
@@ -120,19 +121,22 @@ public class StudyFragment extends Fragment
     questionTextView.setText(spacedRepetition.getCurrentQuestion().getQuestionString());
 
     Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_question_48dp,
-        Color.MAGENTA);
+        android.R.color.primary_text_light);
     answerResultImage.setImageDrawable(drawable);
   }
 
   private void showCorrectAnswerAnimation() {
     Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_correct_48dp,
-        Color.GREEN);
-    answerResultImage.setImageDrawable(drawable);
+        R.color.colorCorrect);
+    Util.animateImageChange(getContext(), answerResultImage, drawable, R.anim.fade_in,
+        R.anim.fade_out);
   }
 
   private void showIncorrectAnswerAnimation() {
-    Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_incorrect_48dp, Color.RED);
-    answerResultImage.setImageDrawable(drawable);
+    Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_incorrect_48dp,
+        R.color.colorIncorrect);
+    Util.animateImageChange(getContext(), answerResultImage, drawable, R.anim.fade_in,
+        R.anim.fade_out);
   }
 
   @Override

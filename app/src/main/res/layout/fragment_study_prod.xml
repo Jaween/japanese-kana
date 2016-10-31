@@ -1,17 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:background="?attr/colorPrimary"
+        app:theme="@style/ToolbarStyle"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:text="Write"
+        android:textAlignment="center"
+        android:textColor="#88000000"
+        android:textSize="24sp"/>
 
     <TextView
         android:id="@+id/question_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Write HIRAGANA\nSA"
+        android:fontFamily="sans-serif-light"
+        android:text="Hiragana Sa"
         android:textAlignment="center"
-        android:textColor="#222222"
-        android:textSize="30sp"/>
+        android:textAllCaps="true"
+        android:textColor="@color/colorTextSecondary"
+        android:textSize="32sp"/>
 
     <ImageView
         android:id="@+id/answer_result_image"
@@ -21,37 +41,42 @@
         android:layout_weight="1"
         android:src="@mipmap/ic_launcher"/>
 
+    <!-- Software layerType is a workaround for the dashed line appearing as a contiguous line -->
     <android.gesture.GestureOverlayView
         android:id="@+id/gesture_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="264dp"
+        android:layout_height="264dp"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:background="#222222"
+        android:background="@drawable/handwriting_pad"
+        android:elevation="4dp"
+        android:gestureColor="@color/colorAccent"
         android:gestureStrokeType="multiple"
+        android:gestureStrokeWidth="16"
+        android:layerType="software"
         android:orientation="vertical">
 
         <ImageView
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_gravity="center_horizontal"
+            android:visibility="invisible"/>
 
     </android.gesture.GestureOverlayView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:orientation="horizontal"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/skip_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="SKIP"
-            style="@style/Widget.AppCompat.Button.Borderless"/>
+            android:text="SKIP"/>
 
         <Space
             android:layout_width="wrap_content"
@@ -60,19 +85,19 @@
 
         <Button
             android:id="@+id/clear_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="CLEAR"
-            style="@style/Widget.AppCompat.Button.Borderless"/>
+            android:text="CLEAR"/>
 
         <Button
             android:id="@+id/done_button"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:elevation="1dp"
             android:padding="0dp"
-            android:text="DONE"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+            android:text="DONE"/>
     </LinearLayout>
 
 </LinearLayout>

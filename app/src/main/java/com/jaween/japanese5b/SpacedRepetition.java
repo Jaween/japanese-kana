@@ -16,11 +16,11 @@ public class SpacedRepetition {
   public SpacedRepetition() {
     // TODO(jaween): Load questions from a database
     questions = new LinkedList<>();
-    questions.add(new Question("Write Hiragana ka", "hiragana_ka"));
-    questions.add(new Question("Write Hiragana ki", "hiragana_ki"));
-    questions.add(new Question("Write Hiragana ku", "hiragana_ku"));
-    questions.add(new Question("Write Katakana shi", "katakana_shi"));
-    questions.add(new Question("Write Katakana tsu", "katakana_tsu"));
+    questions.add(new Question("Hiragana Ka", "hiragana_ka"));
+    questions.add(new Question("Hiragana Ki", "hiragana_ki"));
+    questions.add(new Question("Hiragana Ku", "hiragana_ku"));
+    questions.add(new Question("Katakana Shi", "katakana_shi"));
+    questions.add(new Question("Katakana Tsu", "katakana_tsu"));
   }
 
   public Question getCurrentQuestion() {

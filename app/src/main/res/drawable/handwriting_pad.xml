@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="2dp"/>
+            <solid android:color="@android:color/background_light"/>
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="line">
+            <stroke
+                android:width="2dp"
+                android:color="@color/colorHandwritingDashes"
+                android:dashGap="8dp"
+                android:dashWidth="4dp"/>
+        </shape>
+    </item>
+    <item>
+        <rotate
+            android:fromDegrees="90"
+            android:toDegrees="90">
+            <shape android:shape="line">
+                <stroke
+                    android:width="2dp"
+                    android:color="@color/colorHandwritingDashes"
+                    android:dashGap="8dp"
+                    android:dashWidth="4dp"/>
+            </shape>
+        </rotate>
+    </item>
+</layer-list>
