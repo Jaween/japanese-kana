@@ -5,9 +5,19 @@ import android.os.Bundle;
 
 public class StudyActivity extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_study);
+  private static final String TAG_STUDY_FRAGMENT = "study_fragment";
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_study);
+
+    StudyFragment studyFragment = StudyFragment.newInstance();
+    if (getSupportFragmentManager().findFragmentByTag(TAG_STUDY_FRAGMENT) == null) {
+      getSupportFragmentManager()
+          .beginTransaction()
+          .add(R.id.fragment_container, studyFragment, TAG_STUDY_FRAGMENT)
+          .commit();
     }
+  }
 }
