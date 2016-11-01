@@ -7,13 +7,15 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
+
+import org.opencv.android.OpenCVLoader;
 
 /**
  * Controls a study session.
@@ -46,6 +48,12 @@ public class StudyFragment extends Fragment
 
     handwritingController = new HandwritingController(getContext());
     spacedRepetition = new SpacedRepetition();
+
+    if (OpenCVLoader.initDebug()) {
+      Log.e(TAG, "OPENCV YALL");
+    } else {
+      Log.e(TAG, "FAILED OPENCV YALL");
+    }
   }
 
   @Nullable
