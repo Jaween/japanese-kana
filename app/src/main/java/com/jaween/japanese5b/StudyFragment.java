@@ -191,10 +191,17 @@ public class StudyFragment extends Fragment
   }
 
   private void answerIncorrect() {
-    Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_incorrect_48dp,
+    Drawable incorrectDrawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_incorrect_48dp,
         R.color.colorIncorrect);
-    Util.animateImageChange(getContext(), answerResultImage, drawable, R.anim.fade_in,
-        R.anim.fade_out, null);
+    final Drawable questionDrawable = Util.getDrawable(getContext(), R.mipmap.ic_question_48dp);
+    Util.animateImageChange(getContext(), answerResultImage, incorrectDrawable, R.anim.fade_in,
+        R.anim.fade_out, new Util.AnimationEndListener() {
+          @Override
+          public void onAnimationEnd() {
+            Util.animateImageChange(getContext(), answerResultImage, questionDrawable,
+                R.anim.fade_in, R.anim.fade_out, null);
+          }
+        });
 
     incorrectCount++;
     if (!assistShown && incorrectCount >= showAssistButtonIncorrectCountThreshold) {

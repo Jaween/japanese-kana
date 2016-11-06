@@ -13,7 +13,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:background="?attr/colorPrimary"
-        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingRight="64dp"
         android:elevation="4dp"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarStyle">

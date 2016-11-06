@@ -51,6 +51,22 @@ public class Util {
   }
 
   /**
+   * Loads a drawable
+   * @param context The context to load the resource and theme (if applicable)
+   * @param resourceId The drawable resource to load
+   * @return The loaded drawable
+   */
+  public static Drawable getDrawable(Context context, int resourceId) {
+    Drawable drawable;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      drawable = context.getResources().getDrawable(resourceId, context.getTheme());
+    } else {
+      drawable = context.getResources().getDrawable(resourceId);
+    }
+    return drawable;
+  }
+
+  /**
    * Animates the swapping of two images on an ImageView.
    * Based on http://stackoverflow.com/a/14183532.
    * @param context The context to lead the resources
