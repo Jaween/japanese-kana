@@ -1,5 +1,6 @@
 package com.jaween.japanese5b;
 
+import android.content.Context;
 import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.graphics.Color;
@@ -9,13 +10,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
-
-import org.opencv.android.OpenCVLoader;
 
 /**
  * Controls a study session.
@@ -23,17 +25,27 @@ import org.opencv.android.OpenCVLoader;
 public class StudyFragment extends Fragment
         implements GestureOverlayView.OnGesturePerformedListener {
 
-  private static String TAG = StudyFragment.class.getSimpleName();
+  public interface SessionListener {
+    void onSessionCompleteListener();
+  }
+
+  private static final String TAG = StudyFragment.class.getSimpleName();
+
+  private static final int showAssistButtonIncorrectCountThreshold = 2;
 
   private GestureOverlayView gestureOverlayView;
   private HandwritingController handwritingController;
   private SpacedRepetition spacedRepetition;
+  private SessionListener sessionListener;
 
-  private Button clearButton;
-  private Button doneButton;
-  private Button skipButton;
   private ImageView answerResultImage;
   private TextView questionTextView;
+  private TextView sessionProgressTextView;
+  private ProgressBar sessionProgressBar;
+  private Button skipButton;
+  private Button assistButton;
+  private int incorrectCount = 0;
+  private boolean assistShown = false;
 
   public static StudyFragment newInstance() {
     Bundle arguments = new Bundle();
@@ -49,11 +61,12 @@ public class StudyFragment extends Fragment
     handwritingController = new HandwritingController(getContext());
     spacedRepetition = new SpacedRepetition();
 
-    if (OpenCVLoader.initDebug()) {
-      Log.e(TAG, "OPENCV YALL");
+
+    /*if (OpenCVLoader.initDebug()) {
+      Log.e(TAG, "OpenCV successfully loaded");
     } else {
-      Log.e(TAG, "FAILED OPENCV YALL");
-    }
+      Log.e(TAG, "OpenCV failed to load");
+    }*/
   }
 
   @Nullable
@@ -62,99 +75,138 @@ public class StudyFragment extends Fragment
                            @Nullable Bundle savedInstanceState) {
     View rootView = inflater.inflate(R.layout.fragment_study_prod, null);
     setupViews(rootView);
-    updateQuestion();
+    nextCard();
     return rootView;
   }
 
   private void setupViews(View v) {
-    clearButton = (Button) v.findViewById(R.id.clear);
-    doneButton = (Button) v.findViewById(R.id.done_button);
-    skipButton = (Button) v.findViewById(R.id.skip_button);
     answerResultImage = (ImageView) v.findViewById(R.id.answer_result_image);
     questionTextView = (TextView) v.findViewById(R.id.question_text);
-
-    // TODO(jaween): Implement 'done' action, currently this button performs 'next' action
-    doneButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        moveToNextQuestion(SpacedRepetition.Difficulty.MEDIUM);
-      }
-    });
+    sessionProgressTextView = (TextView) v.findViewById(R.id.session_progress_text);
+    sessionProgressBar = (ProgressBar) v.findViewById(R.id.session_progress_bar);
+    skipButton = (Button) v.findViewById(R.id.skip_button);
+    assistButton = (Button) v.findViewById(R.id.assist_button);
 
     skipButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        moveToNextQuestion(SpacedRepetition.Difficulty.SKIP);
+        spacedRepetition.skipCurrentCard();
       }
     });
 
+    /*// Hack to make the bar non-seekable
+    sessionProgressBar.setOnTouchListener(new View.OnTouchListener() {
+      @Override
+      public boolean onTouch(View v, MotionEvent event) {
+        return true;
+      }
+    });*/
+
     gestureOverlayView = (GestureOverlayView) v.findViewById(R.id.gesture_overlay);
     gestureOverlayView.addOnGesturePerformedListener(this);
-    gestureOverlayView.setUncertainGestureColor(Color.MAGENTA);
     gestureOverlayView.setGestureStrokeLengthThreshold(0.0f);
     gestureOverlayView.setGestureStrokeAngleThreshold(0.0f);
     gestureOverlayView.setGestureStrokeSquarenessTreshold(0.0f);
+  }
 
-    //tempText = (TextView) v.findViewById(R.id.temp_text);
+  @Override
+  public void onResume() {
+    super.onResume();
+    spacedRepetition.resume();
+  }
 
-    /*LinearLayout mainLayout = (LinearLayout) v.findViewById(R.id.temp_layout);
-    for (String gestureName : gestureLibrary.getGestureEntries()) {
-      LinearLayout layout = new LinearLayout(getContext());
-      layout.setOrientation(LinearLayout.HORIZONTAL);
-      LinearLayout.LayoutParams params =
-          new LinearLayout.LayoutParams(
-              LinearLayout.LayoutParams.MATCH_PARENT,
-              LinearLayout.LayoutParams.MATCH_PARENT);
-      layout.setLayoutParams(params);
-      for (Gesture gesture : gestureLibrary.getGestures(gestureName)) {
-        Bitmap bitmap = gesture.toBitmap(128, 128, 10, 10);
-        ImageView panel = new ImageView(getContext());
-        panel.setLayoutParams(
-            new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        panel.setImageBitmap(bitmap);
-        layout.addView(panel);
+  @Override
+  public void onPause() {
+    super.onPause();
+    spacedRepetition.pause();
+  }
+
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    if (!(context instanceof SessionListener)) {
+      throw new ClassCastException("Host of " + StudyFragment.class.getSimpleName() + " must " +
+          "implement " + SessionListener.class.getSimpleName());
+    }
+  }
+
+  /**
+   * Either moves to the next question and updates the UI, or if there are no more cards remaining,
+   * ends the session.
+   */
+  private void nextCard() {
+    // Progress text
+    int completeCardCount = spacedRepetition.getSessionCompleteCardCount();
+    int totalCardCount = spacedRepetition.getSessionTotalCardCount();
+    float progressRatio = (float) completeCardCount / (float) totalCardCount;
+    int progress = (int) (progressRatio * sessionProgressBar.getMax());
+    sessionProgressTextView.setText(progress + "%");
+
+    // Progress bar
+    sessionProgressBar.setProgress(progress);
+
+    if (spacedRepetition.getSessionRemainingCardCount() > 0) {
+      // Question
+      Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_question_48dp,
+          android.R.color.primary_text_light);
+      answerResultImage.setImageDrawable(drawable);
+      questionTextView.setText(spacedRepetition.getCurrentCard().getQuestionString());
+
+      // Assist
+      incorrectCount = 0;
+      hideAssistButton();
+      assistShown = false;
+    } else {
+      if (sessionListener != null) {
+        sessionListener.onSessionCompleteListener();
       }
-      mainLayout.addView(layout);
-    }*/
+      gestureOverlayView.setEnabled(false);
+    }
   }
 
-  private void moveToNextQuestion(SpacedRepetition.Difficulty difficulty) {
-    spacedRepetition.answerQuestion(difficulty);
-    updateQuestion();
-  }
-
-  private void updateQuestion() {
-    questionTextView.setText(spacedRepetition.getCurrentQuestion().getQuestionString());
-
-    Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_question_48dp,
-        android.R.color.primary_text_light);
-    answerResultImage.setImageDrawable(drawable);
-  }
-
-  private void showCorrectAnswerAnimation() {
+  private void answerCorrect() {
     Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_correct_48dp,
         R.color.colorCorrect);
     Util.animateImageChange(getContext(), answerResultImage, drawable, R.anim.fade_in,
-        R.anim.fade_out);
+        R.anim.fade_out, new Util.AnimationEndListener() {
+          @Override
+          public void onAnimationEnd() {
+            nextCard();
+          }
+        });
+
+    spacedRepetition.answerCurrentCard();
   }
 
-  private void showIncorrectAnswerAnimation() {
+  private void answerIncorrect() {
     Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_incorrect_48dp,
         R.color.colorIncorrect);
     Util.animateImageChange(getContext(), answerResultImage, drawable, R.anim.fade_in,
-        R.anim.fade_out);
+        R.anim.fade_out, null);
+
+    incorrectCount++;
+    if (!assistShown && incorrectCount >= showAssistButtonIncorrectCountThreshold) {
+      showAssistButton();
+    }
+  }
+
+  private void showAssistButton() {
+    assistShown = true;
+    Util.circularRevealView(assistButton);
+  }
+
+  private void hideAssistButton() {
+    Util.hideView(assistButton);
   }
 
   @Override
   public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
-    SpacedRepetition.Question question = spacedRepetition.getCurrentQuestion();
-    boolean correct = handwritingController.analyseHandwriting(gesture, question.getAnswerString());
+    SpacedRepetition.Card card = spacedRepetition.getCurrentCard();
+    boolean correct = handwritingController.analyseHandwriting(gesture, card.getAnswerString());
     if (correct) {
-      showCorrectAnswerAnimation();
+      answerCorrect();
     } else {
-      showIncorrectAnswerAnimation();
+      answerIncorrect();
     }
   }
 }

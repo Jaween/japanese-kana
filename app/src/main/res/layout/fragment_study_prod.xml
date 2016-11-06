@@ -7,11 +7,33 @@
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:background="?attr/colorPrimary"
-        app:theme="@style/ToolbarStyle"/>
+        android:elevation="2dp"
+        app:theme="@style/ToolbarStyle">
+
+        <ProgressBar
+            android:id="@+id/session_progress_bar"
+            android:layout_width="300dp"
+            android:layout_height="12dp"
+            android:progress="35"
+            android:progressDrawable="@drawable/progress_bar"
+            android:paddingRight="16dp"
+            style="?android:attr/progressBarStyleHorizontal"/>
+
+        <TextView
+            android:id="@+id/session_progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50/50"
+            android:textColor="@color/colorTextSecondary"
+            android:textStyle="bold"/>
+
+    </android.support.v7.widget.Toolbar>
 
     <TextView
         android:layout_width="match_parent"
@@ -19,7 +41,7 @@
         android:fontFamily="sans-serif-light"
         android:text="Write"
         android:textAlignment="center"
-        android:textColor="#88000000"
+        android:textColor="#66000000"
         android:textSize="24sp"/>
 
     <TextView
@@ -68,15 +90,20 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
 
         <Button
             android:id="@+id/skip_button"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="SKIP"/>
+            android:text="SKIP"
+            android:textColor="@color/colorTextSecondary"/>
 
         <Space
             android:layout_width="wrap_content"
@@ -84,20 +111,13 @@
             android:layout_weight="1"/>
 
         <Button
-            android:id="@+id/clear_button"
-            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/assist_button"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:text="CLEAR"/>
-
-        <Button
-            android:id="@+id/done_button"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:elevation="1dp"
-            android:padding="0dp"
-            android:text="DONE"/>
+            android:layout_height="wrap_content"
+            android:stateListAnimator="@null"
+            android:text="Show"
+            android:visibility="invisible"/>
     </LinearLayout>
 
 </LinearLayout>

@@ -40,7 +40,7 @@ public class HandwritingController {
       }
     }
 
-    Log.i(TAG, "Handwriting: " + log);
+    Log.i(TAG, "Correct? " + correct + ", Symbol name " + symbolName + ", Handwriting: " + log);
     return correct;
   }
 }

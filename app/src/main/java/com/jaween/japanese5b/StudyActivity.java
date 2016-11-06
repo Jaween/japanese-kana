@@ -2,8 +2,9 @@ package com.jaween.japanese5b;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
-public class StudyActivity extends AppCompatActivity {
+public class StudyActivity extends AppCompatActivity implements StudyFragment.SessionListener {
 
   private static final String TAG_STUDY_FRAGMENT = "study_fragment";
 
@@ -19,5 +20,10 @@ public class StudyActivity extends AppCompatActivity {
           .add(R.id.fragment_container, studyFragment, TAG_STUDY_FRAGMENT)
           .commit();
     }
+  }
+
+  @Override
+  public void onSessionCompleteListener() {
+    Toast.makeText(this, "Session Complete", Toast.LENGTH_SHORT).show();
   }
 }
