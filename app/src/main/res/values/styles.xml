@@ -10,7 +10,7 @@
 
     <style name="ToolbarStyle" parent="AppTheme">
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
-        <item name="android:textColorSecondary">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
     </style>
 
 </resources>

@@ -10,7 +10,7 @@
     </item>
     <item android:id="@android:id/progress">
         <scale
-            android:drawable="@color/colorAccent"
+            android:drawable="@color/colorPrimaryDark"
             android:scaleWidth="100%"/>
     </item>
 </layer-list>

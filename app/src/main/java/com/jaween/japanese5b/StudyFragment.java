@@ -8,8 +8,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +47,7 @@ public class StudyFragment extends Fragment
   private ProgressBar sessionProgressBar;
   private Button skipButton;
   private Button assistButton;
+  private Toolbar toolbar;
   private int incorrectCount = 0;
   private boolean assistShown = false;
 
@@ -57,6 +61,8 @@ public class StudyFragment extends Fragment
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    setHasOptionsMenu(true);
 
     handwritingController = new HandwritingController(getContext());
     spacedRepetition = new SpacedRepetition();
@@ -82,11 +88,9 @@ public class StudyFragment extends Fragment
   private void setupViews(View v) {
     answerResultImage = (ImageView) v.findViewById(R.id.answer_result_image);
     questionTextView = (TextView) v.findViewById(R.id.question_text);
-    sessionProgressTextView = (TextView) v.findViewById(R.id.session_progress_text);
     sessionProgressBar = (ProgressBar) v.findViewById(R.id.session_progress_bar);
-    skipButton = (Button) v.findViewById(R.id.skip_button);
-    assistButton = (Button) v.findViewById(R.id.assist_button);
 
+    skipButton = (Button) v.findViewById(R.id.skip_button);
     skipButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -94,13 +98,12 @@ public class StudyFragment extends Fragment
       }
     });
 
-    /*// Hack to make the bar non-seekable
-    sessionProgressBar.setOnTouchListener(new View.OnTouchListener() {
-      @Override
-      public boolean onTouch(View v, MotionEvent event) {
-        return true;
-      }
-    });*/
+    toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+    ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+    ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+    assistButton = (Button) v.findViewById(R.id.assist_button);
+    Util.animateHover(assistButton, 10);
 
     gestureOverlayView = (GestureOverlayView) v.findViewById(R.id.gesture_overlay);
     gestureOverlayView.addOnGesturePerformedListener(this);
@@ -130,6 +133,16 @@ public class StudyFragment extends Fragment
     }
   }
 
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        getActivity().onBackPressed();
+        break;
+    }
+    return super.onOptionsItemSelected(item);
+  }
+
   /**
    * Either moves to the next question and updates the UI, or if there are no more cards remaining,
    * ends the session.
@@ -140,10 +153,9 @@ public class StudyFragment extends Fragment
     int totalCardCount = spacedRepetition.getSessionTotalCardCount();
     float progressRatio = (float) completeCardCount / (float) totalCardCount;
     int progress = (int) (progressRatio * sessionProgressBar.getMax());
-    sessionProgressTextView.setText(progress + "%");
 
     // Progress bar
-    sessionProgressBar.setProgress(progress);
+    Util.animateProgess(sessionProgressBar, progress);
 
     if (spacedRepetition.getSessionRemainingCardCount() > 0) {
       // Question

@@ -6,11 +6,14 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.IntegerRes;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 /**
  * Utility functions.
@@ -176,5 +179,19 @@ public class Util {
 
           }
         }).start();
+  }
+
+  public static void animateProgess(final ProgressBar progressBar, int toProgress) {
+    ValueAnimator animator = ValueAnimator.ofInt(progressBar.getProgress(), toProgress);
+    animator.setDuration(500);
+    animator.setInterpolator(new AccelerateDecelerateInterpolator());
+    animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+      @Override
+      public void onAnimationUpdate(ValueAnimator animation) {
+        int progress = (Integer) animation.getAnimatedValue();
+        progressBar.setProgress(progress);
+      }
+    });
+    animator.start();
   }
 }

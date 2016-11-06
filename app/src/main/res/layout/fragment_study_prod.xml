@@ -9,29 +9,23 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:background="?attr/colorPrimary"
-        android:elevation="2dp"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:elevation="4dp"
+        app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarStyle">
 
         <ProgressBar
             android:id="@+id/session_progress_bar"
-            android:layout_width="300dp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
             android:layout_height="12dp"
-            android:progress="35"
-            android:progressDrawable="@drawable/progress_bar"
-            android:paddingRight="16dp"
-            style="?android:attr/progressBarStyleHorizontal"/>
-
-        <TextView
-            android:id="@+id/session_progress_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="50/50"
-            android:textColor="@color/colorTextSecondary"
-            android:textStyle="bold"/>
+            android:max="2000"
+            android:progress="350"
+            android:progressDrawable="@drawable/progress_bar"/>
 
     </android.support.v7.widget.Toolbar>
 
