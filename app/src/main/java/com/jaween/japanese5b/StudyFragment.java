@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 /**
  * Controls a study session.
@@ -161,7 +162,8 @@ public class StudyFragment extends Fragment
       // Question
       Drawable drawable = Util.getTintedDrawable(getContext(), R.mipmap.ic_question_48dp,
           android.R.color.primary_text_light);
-      answerResultImage.setImageDrawable(drawable);
+      Util.animateImageChange(getContext(), answerResultImage, drawable, R.anim.fade_in, R
+          .anim.fade_out, null);
       questionTextView.setText(spacedRepetition.getCurrentCard().getQuestionString());
 
       // Assist
