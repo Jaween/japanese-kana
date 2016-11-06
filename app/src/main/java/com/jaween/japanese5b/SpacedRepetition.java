@@ -1,59 +1,186 @@
 package com.jaween.japanese5b;
 
-import java.util.LinkedList;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.PriorityQueue;
 
 /**
  * Handles the intervals between repeated serving of question based on prior results.
  */
 public class SpacedRepetition {
-  public enum Difficulty {
-    SKIP, EASY, MEDIUM, HARD
+
+  private enum Difficulty {
+    SKIP, EASY, MEDIUM, HARD, REPEAT
   }
 
-  private List<Question> questions;
+  private static final String TAG = SpacedRepetition.class.getSimpleName();
+  private static final int TIME_TAKEN_EASY = 4000;
+  private static final int TIME_TAKEN_MEDIUM = 8000;
+
+  private PriorityQueue<Card> revisionCards;
+  private PriorityQueue<Card> remainingSessionCards;
+  private List<Card> unseenCards;
+  private List<Card> completeSessionCards;
+  private Timer timer = new Timer();
 
   public SpacedRepetition() {
-    // TODO(jaween): Load questions from a database
-    questions = new LinkedList<>();
-    questions.add(new Question("Hiragana Ka", "hiragana_ka"));
-    questions.add(new Question("Hiragana Ki", "hiragana_ki"));
-    questions.add(new Question("Hiragana Ku", "hiragana_ku"));
-    questions.add(new Question("Katakana Shi", "katakana_shi"));
-    questions.add(new Question("Katakana Tsu", "katakana_tsu"));
-  }
+    int currentSessionTime = getCurrentSessionTime();
+    int previousSessionTime = getPreviousSessionTime();
 
-  public Question getCurrentQuestion() {
-    return questions.get(0);
+    revisionCards = loadRevisionCards(previousSessionTime, currentSessionTime);
+    unseenCards = loadUnseenCards();
+    remainingSessionCards = mergePriorityQueueAndList(revisionCards, unseenCards);
+    completeSessionCards = new ArrayList<>();
+    Log.i(TAG, "Cards for this session are: " + Arrays.deepToString(remainingSessionCards.toArray()));
   }
 
   /**
-   * The subsequent call to getNextQuestion() will be different after calling this function.
-   * @param difficulty The difficulty that the user had in answering the current question
+   * Returns but does not remove the top card of the desk. This also starts the timer if this is
+   * the first time viewing this card this time.
+   * @return current top card of the deck
    */
-  public void answerQuestion(Difficulty difficulty) {
-    computeInterval(getCurrentQuestion(), difficulty);
-    moveToNextQuestion();
+  public Card getCurrentCard() {
+    if (!timer.isStarted() && !timer.isRunning()) {
+      timer.startPause();
+    }
+    return remainingSessionCards.peek();
   }
 
-  private void moveToNextQuestion() {
-    Question question = questions.remove(0);
-    questions.add(question);
+  /**
+   * The Card returned from the subsequent call to getNextCard() will change after calling this
+   * function.
+   */
+  public void answerCurrentCard() {
+    Difficulty difficulty = computeDifficulty(timer.stop());
+    reinsertCard(difficulty);
   }
 
-  // TODO(jaween): Look at https://en.wikipedia.org/wiki/Spaced_repetition
-  private void computeInterval(Question question, Difficulty difficulty) {
-
+  public void skipCurrentCard() {
+    reinsertCard(Difficulty.SKIP);
   }
 
-  public static class Question {
+  public int getSessionRemainingCardCount() {
+    return remainingSessionCards.size();
+  }
+
+  public int getSessionCompleteCardCount() {
+    return completeSessionCards.size();
+  }
+
+  public int getSessionTotalCardCount() {
+    return remainingSessionCards.size() + completeSessionCards.size();
+  }
+
+  public void resume() {
+    if (timer.isStarted() && !timer.isRunning()) {
+      timer.startPause();
+    }
+  }
+
+  public void pause() {
+    if (timer.isStarted() && timer.isRunning()) {
+      timer.startPause();
+    }
+  }
+
+  private void reinsertCard(Difficulty difficulty) {
+    // TODO(jaween): Time units are sessions scale, add inter-session repetition time units
+    // Maybe compute the average time per card and then insert the card a number of cards down the
+    // list based on that (but that would get out of whack when the next card is inserted back into
+    // the current sessions list
+
+
+
+    Card card = remainingSessionCards.poll();
+    int nextSession = computeNextSession(difficulty);
+    card.setInterval(card.getInterval() + nextSession);
+    if (card.getInterval() <= getCurrentSessionTime()) {
+      remainingSessionCards.add(card);
+    } else {
+      completeSessionCards.add(card);
+    }
+
+    Log.i(TAG, "Current session cards are " + Arrays.deepToString(remainingSessionCards.toArray()));
+  }
+
+  private PriorityQueue<Card> loadRevisionCards(int previousSessionTime, int currentSessionTime) {
+    // TODO(jaween): Load the cards needing revision from a database based on the session times
+    PriorityQueue cards = new PriorityQueue<>();
+    cards.add(new Card("Katakana Shi", "katakana_shi", 3));
+    cards.add(new Card("Katakana Tsu", "katakana_tsu", 3));
+    return cards;
+  }
+
+  private List<Card> loadUnseenCards() {
+    // TODO(jaween): Load a set of new cards from a database
+    List<Card> cards = new ArrayList<>();
+    cards.add(new Card("Hiragana Ka", "hiragana_ka", -1));
+    cards.add(new Card("Hiragana Ki", "hiragana_ki", -1));
+    cards.add(new Card("Hiragana Ku", "hiragana_ku", -1));
+    return cards;
+  }
+
+  private int getCurrentSessionTime() {
+    // TODO(jaween): Load session time from shared preferences
+    return 3;
+  }
+
+  private int getPreviousSessionTime() {
+    // TODO(jaween): Load session time from shared preferences
+    return 0;
+  }
+
+  private PriorityQueue<Card> mergePriorityQueueAndList(PriorityQueue<Card> priorityQueue,
+                                                        List<Card> list) {
+    PriorityQueue<Card> merged = new PriorityQueue<>(priorityQueue);
+    for (Card card : list) {
+      merged.add(card);
+    }
+    return merged;
+  }
+
+  private Difficulty computeDifficulty(long timeTaken) {
+    SpacedRepetition.Difficulty difficulty;
+    if (timeTaken <= TIME_TAKEN_EASY) {
+      difficulty = SpacedRepetition.Difficulty.EASY;
+    } else if (timeTaken <= TIME_TAKEN_MEDIUM) {
+      difficulty = SpacedRepetition.Difficulty.MEDIUM;
+    } else {
+      difficulty = SpacedRepetition.Difficulty.HARD;
+    }
+    Log.i(TAG, "Took " + timeTaken + "ms to answer, difficulty was " + difficulty);
+    return difficulty;
+  }
+
+  private int computeNextSession(Difficulty difficulty) {
+    switch (difficulty) {
+      case SKIP:
+        return 0;
+      case EASY:
+        return 2;
+      case MEDIUM:
+        return 1;
+      case HARD:
+        return 0;
+      case REPEAT:
+        return 4;
+      default:
+        return 0;
+    }
+  }
+
+  public static class Card implements Comparable<Card> {
     private String questionString;
     private String answerString;
-    private int score;
+    private int interval;
 
-    public Question(String questionString, String answerString) {
+    public Card(String questionString, String answerString, int interval) {
       this.questionString = questionString;
       this.answerString = answerString;
+      this.interval = interval;
     }
 
     public String getQuestionString() {
@@ -64,8 +191,26 @@ public class SpacedRepetition {
       return  answerString;
     }
 
-    public int getScore() {
-      return score;
+    public void setInterval(int interval) {
+      this.interval = interval;
+    }
+
+    public int getInterval() {
+      return interval;
+    }
+
+    @Override
+    public int compareTo(Card other) {
+      if (other == null) {
+        return 0;
+      } else {
+        return interval - other.getInterval();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return "{ " + getQuestionString() + ", " + getAnswerString() + ", " + interval + "}";
     }
   }
 }
