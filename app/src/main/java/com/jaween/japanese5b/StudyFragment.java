@@ -3,25 +3,20 @@ package com.jaween.japanese5b;
 import android.content.Context;
 import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 /**
  * Controls a study session.
@@ -44,7 +39,6 @@ public class StudyFragment extends Fragment
 
   private ImageView answerResultImage;
   private TextView questionTextView;
-  private TextView sessionProgressTextView;
   private ProgressBar sessionProgressBar;
   private Button skipButton;
   private Button assistButton;
@@ -67,7 +61,6 @@ public class StudyFragment extends Fragment
 
     handwritingController = new HandwritingController(getContext());
     spacedRepetition = new SpacedRepetition();
-
 
     /*if (OpenCVLoader.initDebug()) {
       Log.e(TAG, "OpenCV successfully loaded");
@@ -149,13 +142,8 @@ public class StudyFragment extends Fragment
    * ends the session.
    */
   private void nextCard() {
-    // Progress text
-    int completeCardCount = spacedRepetition.getSessionCompleteCardCount();
-    int totalCardCount = spacedRepetition.getSessionTotalCardCount();
-    float progressRatio = (float) completeCardCount / (float) totalCardCount;
-    int progress = (int) (progressRatio * sessionProgressBar.getMax());
-
     // Progress bar
+    int progress = (int) (spacedRepetition.getSessionProgress() * sessionProgressBar.getMax());
     Util.animateProgess(sessionProgressBar, progress);
 
     if (spacedRepetition.getSessionRemainingCardCount() > 0) {
@@ -175,6 +163,8 @@ public class StudyFragment extends Fragment
         sessionListener.onSessionCompleteListener();
       }
       gestureOverlayView.setEnabled(false);
+      skipButton.setEnabled(false);
+      assistButton.setEnabled(false);
     }
   }
 
