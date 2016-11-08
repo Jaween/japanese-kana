@@ -183,6 +183,7 @@ public class Util {
           @Override
           public void onAnimationEnd(Animator animation) {
             view.setVisibility(View.GONE);
+            view.setAlpha(1.0f);
           }
 
           @Override

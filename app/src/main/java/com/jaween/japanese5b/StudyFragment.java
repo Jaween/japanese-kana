@@ -39,12 +39,14 @@ public class StudyFragment extends Fragment
 
   private ImageView answerResultImage;
   private TextView questionTextView;
+  private TextView strokeDiagramView;
   private ProgressBar sessionProgressBar;
   private Button skipButton;
   private Button assistButton;
   private Toolbar toolbar;
   private int incorrectCount = 0;
-  private boolean assistShown = false;
+  private boolean assistButtonShown = false;
+  private boolean strokeDiagramShown = false;
 
   public static StudyFragment newInstance() {
     Bundle arguments = new Bundle();
@@ -82,6 +84,7 @@ public class StudyFragment extends Fragment
   private void setupViews(View v) {
     answerResultImage = (ImageView) v.findViewById(R.id.answer_result_image);
     questionTextView = (TextView) v.findViewById(R.id.question_text);
+    strokeDiagramView = (TextView) v.findViewById(R.id.stroke_diagram);
     sessionProgressBar = (ProgressBar) v.findViewById(R.id.session_progress_bar);
 
     skipButton = (Button) v.findViewById(R.id.skip_button);
@@ -89,6 +92,7 @@ public class StudyFragment extends Fragment
       @Override
       public void onClick(View v) {
         spacedRepetition.skipCurrentCard();
+        nextCard();
       }
     });
 
@@ -97,6 +101,15 @@ public class StudyFragment extends Fragment
     ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
 
     assistButton = (Button) v.findViewById(R.id.assist_button);
+    assistButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        if (strokeDiagramShown == false) {
+          Util.hideView(assistButton);
+          showStrokeDiagram();
+        }
+      }
+    });
     Util.animateHover(assistButton, 10);
 
     gestureOverlayView = (GestureOverlayView) v.findViewById(R.id.gesture_overlay);
@@ -153,11 +166,13 @@ public class StudyFragment extends Fragment
       Util.animateImageChange(getContext(), answerResultImage, drawable, R.anim.fade_in, R
           .anim.fade_out, null);
       questionTextView.setText(spacedRepetition.getCurrentCard().getQuestionString());
+      strokeDiagramView.setText(spacedRepetition.getCurrentCard().getTempStrokeDiagram());
 
       // Assist
       incorrectCount = 0;
-      hideAssistButton();
-      assistShown = false;
+      hideAssistance();
+      assistButtonShown = false;
+      strokeDiagramShown = false;
     } else {
       if (sessionListener != null) {
         sessionListener.onSessionCompleteListener();
@@ -178,6 +193,7 @@ public class StudyFragment extends Fragment
             nextCard();
           }
         });
+    hideAssistance();
 
     spacedRepetition.answerCurrentCard();
   }
@@ -196,18 +212,23 @@ public class StudyFragment extends Fragment
         });
 
     incorrectCount++;
-    if (!assistShown && incorrectCount >= showAssistButtonIncorrectCountThreshold) {
+    if (!assistButtonShown && incorrectCount >= showAssistButtonIncorrectCountThreshold) {
       showAssistButton();
     }
   }
 
   private void showAssistButton() {
-    assistShown = true;
+    assistButtonShown = true;
     Util.circularRevealView(assistButton);
   }
 
-  private void hideAssistButton() {
-    Util.hideView(assistButton);
+  private void showStrokeDiagram() {
+    strokeDiagramShown = true;
+    strokeDiagramView.setVisibility(View.VISIBLE);
+  }
+
+  private void hideAssistance() {
+    Util.hideView(strokeDiagramView);
   }
 
   @Override

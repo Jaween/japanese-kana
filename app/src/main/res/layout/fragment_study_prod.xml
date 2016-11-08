@@ -13,8 +13,8 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:background="?attr/colorPrimary"
-        android:paddingRight="64dp"
         android:elevation="4dp"
+        android:paddingRight="64dp"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarStyle">
 
@@ -74,10 +74,13 @@
         android:layerType="software"
         android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:layout_gravity="center_horizontal"
+        <TextView
+            android:id="@+id/stroke_diagram"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Sa"
+            android:textSize="150sp"
             android:visibility="invisible"/>
 
     </android.gesture.GestureOverlayView>

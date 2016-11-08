@@ -16,8 +16,8 @@ public class SpacedRepetition {
   }
 
   private static final String TAG = SpacedRepetition.class.getSimpleName();
-  private static final int TIME_TAKEN_EASY = 4000;
-  private static final int TIME_TAKEN_MEDIUM = 8000;
+  private static final int TIME_TAKEN_EASY = 3000;
+  private static final int TIME_TAKEN_MEDIUM = 6000;
   private static final int REINSERTION_DISTANCE_EASY = 20;
   private static final int REINSERTION_DISTANCE_MEDIUM = 10;
   private static final int REINSERTION_DISTANCE_HARD = 5;
@@ -132,17 +132,17 @@ public class SpacedRepetition {
   private List<Card> loadRevisionCards(long previousSessionTime, long currentSessionTime) {
     // TODO(jaween): Load the cards needing revision from a database based on the session times
     List cards = new ArrayList();
-    cards.add(new Card("Katakana Shi", "katakana_shi", 3, 1));
-    cards.add(new Card("Katakana Tsu", "katakana_tsu", 3, 1));
+    cards.add(new Card("Katakana Shi", "katakana_shi", "シ", 3, 1));
+    cards.add(new Card("Katakana Tsu", "katakana_tsu", "ツ", 3, 1));
     return cards;
   }
 
   private List<Card> loadUnseenCards() {
     // TODO(jaween): Load a set of new cards from a database
     List<Card> cards = new ArrayList<>();
-    cards.add(new Card("Hiragana Ka", "hiragana_ka", -1, -1));
-    cards.add(new Card("Hiragana Ki", "hiragana_ki", -1, -1));
-    cards.add(new Card("Hiragana Ku", "hiragana_ku", -1, -1));
+    cards.add(new Card("Hiragana Ka", "hiragana_ka", "か", -1, -1));
+    cards.add(new Card("Hiragana Ki", "hiragana_ki", "き", -1, -1));
+    cards.add(new Card("Hiragana Ku", "hiragana_ku", "く", -1, -1));
     return cards;
   }
 
@@ -214,13 +214,16 @@ public class SpacedRepetition {
 
     private String questionString;
     private String answerString;
+    private String tempStrokeDiagram;
     private long nextStudy;
     private long interval;
     private int sessionRemainingScore;
 
-    public Card(String questionString, String answerString, long nextStudy, long interval) {
+    public Card(String questionString, String answerString, String tempStrokeDiagram,
+                long nextStudy, long interval) {
       this.questionString = questionString;
       this.answerString = answerString;
+      this.tempStrokeDiagram = tempStrokeDiagram;
       this.nextStudy = nextStudy;
       this.interval = interval;
       sessionRemainingScore = SESSION_REMAINING_SCORE_INITIAL_VALUE;
@@ -232,6 +235,10 @@ public class SpacedRepetition {
 
     public String getAnswerString() {
       return  answerString;
+    }
+
+    public String getTempStrokeDiagram() {
+      return tempStrokeDiagram;
     }
 
     public void setInterval(long interval) {
